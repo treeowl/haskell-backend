@@ -1,5 +1,5 @@
-{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- |
 Copyright   : (c) Runtime Verification, 2018-2021
@@ -205,8 +205,8 @@ import Data.Functor.Foldable (
 import Data.Functor.Foldable qualified as Recursive
 import Data.Map.Strict qualified as Map
 import Data.Monoid (
+    All (..),
     Endo (..),
-    All (..)
  )
 import Data.Set (
     Set,
@@ -216,7 +216,6 @@ import Data.Text (
  )
 import Data.Text qualified as Text
 import Data.These
-import Unsafe.Coerce (unsafeCoerce)
 import Kore.Attribute.Pattern.ConstructorLike qualified as Attribute
 import Kore.Attribute.Pattern.FreeVariables qualified as Attribute
 import Kore.Attribute.Pattern.FreeVariables qualified as Attribute.FreeVariables (
@@ -298,6 +297,7 @@ import Kore.Variables.Fresh (
 import Kore.Variables.Fresh qualified as Fresh
 import Prelude.Kore
 import Pretty qualified
+import Unsafe.Coerce (unsafeCoerce)
 
 hasFreeVariable ::
     Ord variable =>
@@ -392,10 +392,10 @@ asConcrete ::
     TermLike variable ->
     Maybe (TermLike Concrete)
 asConcrete t
-  | isConcrete t
-  = Just (unsafeCoerceGuarded t)
-  | otherwise
-  = Nothing
+    | isConcrete t =
+        Just (unsafeCoerceGuarded t)
+    | otherwise =
+        Nothing
 
 -- | Check whether a @TermLike@ is concrete.
 isConcrete :: forall variable. TermLike variable -> Bool

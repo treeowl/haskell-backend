@@ -1,8 +1,9 @@
+{-# LANGUAGE Trustworthy #-}
+
 {- |
 Copyright   : (c) Runtime Verification, 2019-2021
 License     : BSD-3-Clause
 -}
-{-# LANGUAGE Trustworthy #-}
 module Kore.Syntax.Pattern (
     Pattern (..),
     asPattern,
@@ -44,14 +45,13 @@ import Data.Kind (
     Type,
  )
 import Data.Monoid (
-    All (..)
+    All (..),
  )
 import Data.Text (
     Text,
  )
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
-import Unsafe.Coerce (unsafeCoerce)
 import Kore.Attribute.Null qualified as Attribute
 import Kore.Debug
 import Kore.Internal.UnsafeCoerce (unsafeCoerceGuarded)
@@ -90,6 +90,7 @@ import Kore.Unparser
 import Prelude.Kore
 import Pretty qualified
 import SQL qualified
+import Unsafe.Coerce (unsafeCoerce)
 
 {- | The abstract syntax of Kore.
 
@@ -517,10 +518,10 @@ asConcretePattern ::
     Pattern variable annotation ->
     Maybe (Pattern Concrete annotation)
 asConcretePattern p
-  | isConcrete p
-  = Just (unsafeCoerceGuarded p)
-  | otherwise
-  = Nothing
+    | isConcrete p =
+        Just (unsafeCoerceGuarded p)
+    | otherwise =
+        Nothing
 
 -- | Check whether a pattern is concrete.
 isConcrete :: forall variable annotation. Pattern variable annotation -> Bool
@@ -533,7 +534,6 @@ isConcrete = Recursive.fold worker
 
 isConcreteF :: PatternF variable child -> Bool
 isConcreteF = getAll . getConst . PatternF.traverseVariables (pure (\_var -> Const (All False)))
-
 
 {- | Construct a 'Pattern' from a @ConcretePattern@.
 

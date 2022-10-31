@@ -66,7 +66,6 @@ import Data.Text qualified as Text
 import GHC.Generics qualified as GHC
 import GHC.Stack qualified as GHC
 import Generics.SOP qualified as SOP
-import Unsafe.Coerce (unsafeCoerce)
 import Kore.AST.AstWithLocation
 import Kore.Attribute.Pattern.ConstructorLike qualified as Attribute
 import Kore.Attribute.Pattern.Created qualified as Attribute
@@ -157,6 +156,7 @@ import Pretty (
  )
 import Pretty qualified
 import SQL qualified
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | 'TermLikeF' is the 'Base' functor of internal term-like patterns.
 data TermLikeF variable child
@@ -825,9 +825,7 @@ instance Unparse (TermLike variable) => SQL.Column (TermLike variable) where
     defineColumn = SQL.defineTextColumn
     toColumn = SQL.toColumn . Pretty.renderText . Pretty.layoutOneLine . unparse
 
-instance
-    From (TermLike Concrete) (TermLike variable)
-    where
+instance From (TermLike Concrete) (TermLike variable) where
     from = unsafeCoerce
     {-# INLINE from #-}
 
