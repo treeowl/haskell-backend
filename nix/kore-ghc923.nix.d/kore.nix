@@ -277,6 +277,7 @@
         "Kore/Internal/TermLike"
         "Kore/Internal/TermLike/Renaming"
         "Kore/Internal/TermLike/TermLike"
+        "Kore/Internal/UnsafeCoerce"
         "Kore/Internal/Variable"
         "Kore/JsonRpc"
         "Kore/Log"

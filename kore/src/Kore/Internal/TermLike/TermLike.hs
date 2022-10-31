@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 {- |
@@ -65,6 +66,7 @@ import Data.Text qualified as Text
 import GHC.Generics qualified as GHC
 import GHC.Stack qualified as GHC
 import Generics.SOP qualified as SOP
+import Unsafe.Coerce (unsafeCoerce)
 import Kore.AST.AstWithLocation
 import Kore.Attribute.Pattern.ConstructorLike qualified as Attribute
 import Kore.Attribute.Pattern.Created qualified as Attribute
@@ -824,10 +826,9 @@ instance Unparse (TermLike variable) => SQL.Column (TermLike variable) where
     toColumn = SQL.toColumn . Pretty.renderText . Pretty.layoutOneLine . unparse
 
 instance
-    (FreshPartialOrd variable) =>
     From (TermLike Concrete) (TermLike variable)
     where
-    from = mapVariables (pure $ from @Concrete)
+    from = unsafeCoerce
     {-# INLINE from #-}
 
 instance Ord variable => From Key (TermLike variable) where

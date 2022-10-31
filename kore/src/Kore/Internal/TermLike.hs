@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE Trustworthy #-}
 
 {- |
 Copyright   : (c) Runtime Verification, 2018-2021
@@ -205,6 +206,7 @@ import Data.Functor.Foldable qualified as Recursive
 import Data.Map.Strict qualified as Map
 import Data.Monoid (
     Endo (..),
+    All (..)
  )
 import Data.Set (
     Set,
@@ -214,6 +216,7 @@ import Data.Text (
  )
 import Data.Text qualified as Text
 import Data.These
+import Unsafe.Coerce (unsafeCoerce)
 import Kore.Attribute.Pattern.ConstructorLike qualified as Attribute
 import Kore.Attribute.Pattern.FreeVariables qualified as Attribute
 import Kore.Attribute.Pattern.FreeVariables qualified as Attribute.FreeVariables (
@@ -251,6 +254,7 @@ import Kore.Internal.Symbol (
  )
 import Kore.Internal.Symbol qualified as Symbol
 import Kore.Internal.TermLike.TermLike
+import Kore.Internal.UnsafeCoerce (unsafeCoerceGuarded)
 import Kore.Internal.Variable
 import Kore.Sort
 import Kore.Substitute
@@ -378,32 +382,45 @@ A concrete pattern contains no variables, so @asConcreteStepPattern@ is
 fully polymorphic on the variable type in the pure pattern. If the argument
 contains any variables, the result is @Nothing@.
 
-@asConcrete@ is strict, i.e. it traverses its argument entirely,
-because the entire tree must be traversed to inspect for variables before
-deciding if the result is @Nothing@ or @Just _@.
+@asConcrete@ is strict, i.e. it traverses its argument entirely, because the
+entire tree must be traversed to inspect for variables before deciding if the
+result is @Nothing@ or @Just _@. To improve performance, it does not rebuild
+its argument; after verifying that its argument is concrete, @asConcrete@ uses
+an unsafe coercion to perform the actual conversion.
 -}
 asConcrete ::
-    Ord variable =>
     TermLike variable ->
     Maybe (TermLike Concrete)
-asConcrete = traverseVariables (pure toConcrete)
+asConcrete t
+  | isConcrete t
+  = Just (unsafeCoerceGuarded t)
+  | otherwise
+  = Nothing
 
-isConcrete :: Ord variable => TermLike variable -> Bool
-isConcrete = isJust . asConcrete
+-- | Check whether a @TermLike@ is concrete.
+isConcrete :: forall variable. TermLike variable -> Bool
+-- Warning: This function is used to guard an unsafe coercion in asConcrete. It
+-- therefore MUST NOT return True if the term contains any variables.
+isConcrete = Recursive.fold worker
+  where
+    worker :: CofreeF (TermLikeF variable) (TermAttributes variable) Bool -> Bool
+    worker (_attrs :< t) = isConcreteF t && and t
+
+isConcreteF :: TermLikeF variable child -> Bool
+isConcreteF = getAll . getConst . traverseVariablesF (pure (\_var -> Const (All False)))
 
 {- | Construct any 'TermLike' from a @'TermLike' 'Concrete'@.
 
 The concrete pattern contains no variables, so the result is fully
 polymorphic in the variable type.
 
-@fromConcrete@ unfolds the resulting syntax tree lazily, so it
-composes with other tree transformations without allocating intermediates.
+@fromConcrete@ is implemented using 'unsafeCoerce' to avoid actually
+traversing the tree.
 -}
 fromConcrete ::
-    FreshPartialOrd variable =>
     TermLike Concrete ->
     TermLike variable
-fromConcrete = mapVariables (pure $ from @Concrete)
+fromConcrete = unsafeCoerce
 
 {- | Is the 'TermLike' fully simplified under the given side condition?
 
