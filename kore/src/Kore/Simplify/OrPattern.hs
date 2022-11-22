@@ -62,7 +62,7 @@ import Kore.TopBottom (
     TopBottom (..),
  )
 import Logic (
-    LogicT,
+    SeqT,
  )
 import Logic qualified
 import Prelude.Kore
@@ -80,7 +80,7 @@ simplifyConditionsWithSmt sideCondition unsimplified =
   where
     simplifyAndPrune ::
         Pattern RewritingVariableName ->
-        LogicT simplifier (Pattern RewritingVariableName)
+        SeqT simplifier (Pattern RewritingVariableName)
     simplifyAndPrune (Pattern.splitTerm -> (term, condition)) = do
         simplified <- simplifyCondition sideCondition condition
         filtered <-

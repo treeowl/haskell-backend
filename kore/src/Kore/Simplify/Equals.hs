@@ -76,7 +76,7 @@ import Kore.Unification.Unify (
     MonadUnify,
  )
 import Logic (
-    LogicT,
+    SeqT,
  )
 import Logic qualified
 import Prelude.Kore
@@ -426,7 +426,7 @@ termEqualsAnd ::
     HasCallStack =>
     TermLike RewritingVariableName ->
     TermLike RewritingVariableName ->
-    MaybeT (LogicT simplifier) (Pattern RewritingVariableName)
+    MaybeT (SeqT simplifier) (Pattern RewritingVariableName)
 termEqualsAnd p1 p2 =
     MaybeT $ run $ maybeTermEqualsWorker p1 p2
   where

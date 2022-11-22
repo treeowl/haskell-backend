@@ -93,7 +93,7 @@ import Kore.Unification.SubstitutionNormalization (
     normalize,
  )
 import Logic (
-    LogicT,
+    SeqT,
  )
 import Prelude.Kore
 import Pretty qualified
@@ -146,7 +146,7 @@ newtype MakeAnd monad = MakeAnd
     }
 
 simplificationMakeAnd ::
-    MonadSimplify simplifier => MakeAnd (LogicT simplifier)
+    MonadSimplify simplifier => MakeAnd (SeqT simplifier)
 simplificationMakeAnd =
     MakeAnd{makeAnd}
   where

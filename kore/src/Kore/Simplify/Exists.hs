@@ -75,7 +75,7 @@ import Kore.Substitute
 import Kore.TopBottom qualified as TopBottom
 import Kore.Unparser
 import Logic (
-    LogicT,
+    SeqT,
  )
 import Logic qualified
 import Prelude.Kore
@@ -171,7 +171,7 @@ makeEvaluate sideCondition variables original = do
     makeEvaluateWorker ::
         ElementVariable RewritingVariableName ->
         Pattern RewritingVariableName ->
-        LogicT simplifier (Pattern RewritingVariableName)
+        SeqT simplifier (Pattern RewritingVariableName)
     makeEvaluateWorker variable original' = do
         normalized <- simplifyCondition sideCondition original'
         let Conditional{substitution = normalizedSubstitution} = normalized
@@ -291,7 +291,7 @@ makeEvaluateBoundLeft ::
     -- | substituted term
     TermLike RewritingVariableName ->
     Pattern RewritingVariableName ->
-    LogicT simplifier (Pattern RewritingVariableName)
+    SeqT simplifier (Pattern RewritingVariableName)
 makeEvaluateBoundLeft sideCondition variable boundTerm normalized =
     withoutFreeVariable someVariableName boundTerm $ do
         let boundSubstitution = Map.singleton someVariableName boundTerm
@@ -328,7 +328,7 @@ makeEvaluateBoundRight ::
     Substitution RewritingVariableName ->
     -- | pattern to quantify
     Pattern RewritingVariableName ->
-    LogicT simplifier (Pattern RewritingVariableName)
+    SeqT simplifier (Pattern RewritingVariableName)
 makeEvaluateBoundRight sideCondition variable freeSubstitution normalized = do
     orCondition <-
         lift $

@@ -40,7 +40,7 @@ import Kore.TopBottom qualified as TopBottom
 import Kore.Unification.NewUnifier
 import Kore.Unification.Unify qualified as Monad.Unify
 import Logic (
-    lowerLogicT,
+    lowerSeqT,
     observeAllT,
  )
 import Prelude.Kore
@@ -70,7 +70,7 @@ unificationProcedure sideCondition p1 p2
         orCeil <- makeEvaluateTermCeil sideCondition term
         marker "unify" "CombineCeil"
         ceil' <- Monad.Unify.scatter orCeil
-        lowerLogicT . simplifyCondition sideCondition $
+        lowerSeqT . simplifyCondition sideCondition $
             Conditional.andCondition ceil' condition
   where
     p1Sort = termLikeSort p1
